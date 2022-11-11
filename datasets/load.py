@@ -4,6 +4,7 @@ from torchvision import datasets, transforms
 from typing import Tuple, Any
 from group import group_classes
 
+
 class CustomImageFolder(datasets.ImageFolder):
     def __getitem__(self, index: int) -> Tuple[Any, Any]:
         """
@@ -22,6 +23,7 @@ class CustomImageFolder(datasets.ImageFolder):
         if self.target_transform is not None:
             target = self.target_transform(target)
         return sample, int(self.classes[target])
+
 
 def get_loader(path="UTKFace", batch_size=32):
     grouped_dir = path + "_grouped"
