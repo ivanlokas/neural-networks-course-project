@@ -1,8 +1,16 @@
+from pathlib import Path
+
 import tkinter as tk
 from tkinter import ttk
 from tkinter import filedialog as fd
+
+import torch
+
 from PIL import Image, ImageTk
-import random
+from torchvision.transforms import transforms
+
+from datasets.load import CustomImageFolder
+from models.cnn_deep import DeepModel
 
 
 class EstimatorApp(tk.Tk):
@@ -19,12 +27,12 @@ class EstimatorApp(tk.Tk):
         screen_height = self.winfo_screenheight()
 
         # center coordinates
-        center_x = int(screen_width/2 - window_width / 2)
-        center_y = int(screen_height/2 - window_height / 2)
+        center_x = int(screen_width / 2 - window_width / 2)
+        center_y = int(screen_height / 2 - window_height / 2)
 
         # set the position of the window to the center of the screen
         self.geometry(f'{window_width}x{window_height}+{center_x}+{center_y}')
-        self.iconbitmap('./gui/icons/app_icon.ico')
+        self.iconbitmap(Path(__file__).parent / 'icons/app_icon.ico')
 
     def mainloop(self):
         frame = MainFrame(self)
@@ -38,6 +46,20 @@ class EstimatorApp(tk.Tk):
 
 
 class MainFrame(ttk.Frame):
+    # Image transform
+    transform = transforms.ToTensor()
+
+    # Data
+    data_path = Path(__file__).parent.parent / 'datasets' / 'UTKFace_grouped'
+    data = CustomImageFolder(data_path, transform=transforms.ToTensor())
+
+    # Model
+    model = DeepModel()
+
+    # Load state dict
+    path = Path(__file__).parent.parent / 'states' / 'deep_bs_16_ne_100_lr_0.001_wd_1e-06_g_0.9999' / f'epoch_{50}'
+    model.load_state_dict(torch.load(path))
+
     def __init__(self, container):
         super().__init__(container)
         self.widget_setup()
@@ -106,10 +128,12 @@ class MainFrame(ttk.Frame):
     def action_estimate(self, event=None):
         path = self.image_canvas.image_path
 
-        # TODO: Use the path to load the image as model input and then run the model
-        # output of model should be a numerical estimation of age for the given picture
-        # e.g.
-        model_output = random.randint(1, 100)
+        custom_image = MainFrame.data.loader(path)
+        custom_image = MainFrame.transform(custom_image)
+        custom_image = torch.unsqueeze(custom_image, 0)
+
+        model_output = MainFrame.model(custom_image)
+        model_output = round(model_output.item())
 
         self.result_label["text"] = model_output
 
@@ -132,7 +156,7 @@ class MainFrame(ttk.Frame):
 class ImageCanvas(tk.Canvas):
     def __init__(self, container):
         super().__init__(container)
-        self.load_image('./gui/images/test.jpg')
+        self.load_image(Path(__file__).parent / 'images/test.jpg')
         self["highlightthickness"] = 0
 
     def load_image(self, path):
