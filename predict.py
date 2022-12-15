@@ -10,15 +10,6 @@ from models.cnn_complex import ComplexModel
 from models.cnn_deep import DeepModel
 
 if __name__ == "__main__":
-    # Hyper parameters
-    batch_size = 16
-
-    learning_rate = 1e-3
-    weight_decay = 1e-6
-    gamma = 0.9999
-
-    n_epochs = 100
-
     # Model
     model = DeepModel()
 
@@ -26,7 +17,7 @@ if __name__ == "__main__":
     dataset_name = 'UTKFace_grouped'
 
     # Dataloaders
-    train_dataloader, validation_dataloader, test_dataloader = get_loaders(dataset_name, batch_size=batch_size)
+    train_dataloader, validation_dataloader, test_dataloader = get_loaders(dataset_name, batch_size=32)
 
     # Load state dict
     path = Path(__file__).parent / 'states' / 'deep_bs_16_ne_100_lr_0.001_wd_1e-06_g_0.9999' / f'epoch_{50}'
