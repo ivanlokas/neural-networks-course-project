@@ -51,8 +51,3 @@ if __name__ == "__main__":
         save_state=save_state,
         save_state_dir=f'{save_state_dir}'
     )
-
-    # Load state dict
-    # if save_state:
-    #     path = Path(__file__).parent / 'states' / f'{save_state_dir}_{i}' / f'epoch_{n_epochs}'
-    #     model.load_state_dict(torch.load(path))
