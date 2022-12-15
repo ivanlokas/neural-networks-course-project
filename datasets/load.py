@@ -1,8 +1,9 @@
-import torch
-import os
+from pathlib import Path
+
 from torchvision import datasets, transforms
+from torch.utils.data import DataLoader, random_split
+
 from typing import Tuple, Any
-from group import group_classes
 
 
 class CustomImageFolder(datasets.ImageFolder):
@@ -18,17 +19,37 @@ class CustomImageFolder(datasets.ImageFolder):
         """
         path, target = self.samples[index]
         sample = self.loader(path)
+
         if self.transform is not None:
             sample = self.transform(sample)
+
         if self.target_transform is not None:
             target = self.target_transform(target)
-        return sample, int(self.classes[target])
+
+        return sample, int(self.classes[target]) - 1
 
 
-def get_loader(path="UTKFace", batch_size=32):
-    grouped_dir = path + "_grouped"
-    if not os.path.isdir(grouped_dir):
-        group_classes(path)
-    data = CustomImageFolder(grouped_dir, transform=transforms.ToTensor())
-    loader = torch.utils.data.DataLoader(data, batch_size, shuffle=True)
-    return loader
+def get_loaders(batch_size: int = 32) -> Tuple[DataLoader, DataLoader, DataLoader]:
+    """
+    Retrieves batch loaders with given batch size
+
+    Args:
+         batch_size (int): Batch size
+
+    Returns:
+        Tuple[DataLoader, DataLoader, DataLoader]: Train, validation and test dataloaders
+    """
+    DATA_DIR = Path(__file__).parent / 'UTKFace'
+    DATA_DIR_GRUPED = Path(__file__).parent / 'UTKFace_grouped_10'
+    # DATA_DIR_GRUPED = Path(__file__).parent / 'UTKFace_grouped_bin'
+    # DATA_DIR_GRUPED = Path(__file__).parent / 'UTKFace_grouped'
+
+    data = CustomImageFolder(DATA_DIR_GRUPED, transform=transforms.ToTensor())
+
+    train_data, validation_data, test_data = random_split(data, [0.5, 0.25, 0.25])
+
+    train_dataloader = DataLoader(train_data, batch_size=batch_size, shuffle=True)
+    validation_dataloader = DataLoader(validation_data, batch_size=batch_size, shuffle=True)
+    test_dataloader = DataLoader(test_data, batch_size=batch_size, shuffle=True)
+
+    return train_dataloader, validation_dataloader, test_dataloader
