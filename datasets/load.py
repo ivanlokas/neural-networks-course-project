@@ -40,6 +40,7 @@ def get_loaders(dataset_name: str, batch_size: int = 32) -> Tuple[DataLoader, Da
     Returns:
         Tuple[DataLoader, DataLoader, DataLoader]: Train, validation and test dataloaders
     """
+
     DATA_DIR = Path(__file__).parent / 'UTKFace'
     DATA_DIR_GRUPED = Path(__file__).parent / dataset_name
 
