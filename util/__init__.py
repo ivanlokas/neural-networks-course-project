@@ -1,3 +1,7 @@
+import os
+from pathlib import Path
+
+import torch
 from torch.utils.tensorboard import SummaryWriter
 
 
@@ -10,6 +14,8 @@ def train(
         optimizer,
         scheduler,
         n_epochs,
+        save_state=False,
+        save_state_dir=None
 ) -> None:
     """
     Generic model training function
@@ -23,7 +29,11 @@ def train(
         optimizer: Optimizer
         scheduler: Scheduler
         n_epochs: Number of epochs
+        save_state: True if model should be saved, False otherwise
+        save_state_dir: Directory where model will be saved
     """
+
+    start_state_dict = model.state_dict()
 
     writer = SummaryWriter()
 
@@ -59,5 +69,22 @@ def train(
             # Update elements
             optimizer.step()
             scheduler.step()
+
+        # Save model state
+        if save_state:
+
+            # Specify save state directory
+            path = Path(__file__).parent.parent / 'states' / save_state_dir
+
+            # Create save state directory, if it does not exist
+            if not os.path.exists(path):
+                os.makedirs(path)
+
+            # Save starting state
+            if epoch == 0:
+                torch.save(start_state_dict, path / f'epoch_{epoch}')
+
+            # Save state at end of epoch
+            torch.save(model.state_dict(), path / f'epoch_{epoch + 1}')
 
     writer.close()
