@@ -29,20 +29,19 @@ class CustomImageFolder(datasets.ImageFolder):
         return sample, int(self.classes[target]) - 1
 
 
-def get_loaders(batch_size: int = 32) -> Tuple[DataLoader, DataLoader, DataLoader]:
+def get_loaders(dataset_name: str, batch_size: int = 32) -> Tuple[DataLoader, DataLoader, DataLoader]:
     """
     Retrieves batch loaders with given batch size
 
     Args:
-         batch_size (int): Batch size
+        dataset_name (str): Relative dataset path
+        batch_size (int): Batch size
 
     Returns:
         Tuple[DataLoader, DataLoader, DataLoader]: Train, validation and test dataloaders
     """
     DATA_DIR = Path(__file__).parent / 'UTKFace'
-    DATA_DIR_GRUPED = Path(__file__).parent / 'UTKFace_grouped_10'
-    # DATA_DIR_GRUPED = Path(__file__).parent / 'UTKFace_grouped_bin'
-    # DATA_DIR_GRUPED = Path(__file__).parent / 'UTKFace_grouped'
+    DATA_DIR_GRUPED = Path(__file__).parent / dataset_name
 
     data = CustomImageFolder(DATA_DIR_GRUPED, transform=transforms.ToTensor())
 
